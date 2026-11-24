@@ -1,0 +1,574 @@
+---
+title: "IC11-2-Case 31 - Summary of Data Analysis: R1, R2, R5, & R6"
+author: "Willy Su"
+date: "November 24, 2026"
+format:
+  revealjs:
+    theme: simple
+    smaller: true
+    scrollable: true
+    width: 1280
+    height: 900
+    margin: 0.06
+    fig-width: 9
+    fig-height: 4.5
+    fig-align: center
+    include-in-header:
+      - text: |
+          <style>
+          .reveal { font-size: 29px; }
+          .reveal h2 { font-size: 1.45em; }
+          .reveal pre { font-size: 0.65em; width: 100%; }
+          .reveal table { font-size: 0.70em; }
+          .reveal table td, .reveal table th { padding: 0.15em 0.4em; }
+          .reveal .slide figure img { max-height: 570px; object-fit: contain; }
+          </style>
+    slide-number: true
+    embed-resources: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## Data Preparation
+
+```{r}
+library(haven)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+
+efcu <- read_sav("Case 31 Data_efcu_4.sav")
+
+dim(efcu)
+names(efcu)
+```
+
+## R1: Reasons for Joining the Credit Union
+
+### Descriptive Statistics
+
+```{r}
+#| label: tbl-r1-descriptive
+#| tbl-cap: "Distribution of Members' Opinions on Savings Interest Rates"
+
+attr(efcu$q7, "labels")
+
+table(efcu$q7, useNA = "ifany")
+
+round(prop.table(table(efcu$q7)) * 100, 2)
+```
+
+## R1: One-Sample t-test
+
+```{r}
+q7_valid <- as.numeric(efcu$q7)
+q7_valid <- q7_valid[q7_valid %in% 1:5]
+
+mean(q7_valid)
+sd(q7_valid)
+
+t.test(q7_valid, mu = 3)
+```
+
+## R1: Savings Interest Rate Perceptions
+
+```{r}
+#| label: fig-r1-rates
+#| fig-cap: "Members' Perceptions of Savings Interest Rates"
+
+r1_data <- data.frame(
+  Rating = factor(
+    q7_valid,
+    levels = 1:5,
+    labels = c("Very High", "High", "Average",
+               "Low", "Very Low")
+  )
+)
+
+ggplot(r1_data, aes(x = Rating)) +
+  geom_bar(
+    aes(y = after_stat(count / sum(count) * 100)),
+    fill = "steelblue"
+  ) +
+  labs(
+    x = "Interest Rate Rating",
+    y = "Percentage (%)"
+  ) +
+  theme_minimal()
+```
+
+## R1: Findings and Insights
+
+As shown in @fig-r1-rates, most members (70.34%) perceived the credit union's savings interest rates as average, while 18.64% rated them as high and 11.02% rated them as low or very low.
+
+The average rating was not significantly different from the midpoint of 3 (M = 2.93, SD = 0.57, t(117) = -1.30, p = .196).
+
+These findings suggest that savings interest rates may not be a strong competitive advantage for attracting new members. However, Q7 measures rate perceptions rather than actual reasons for joining.
+
+## R2: Reasons for Borrowing from Other Financial Institutions
+
+### Descriptive Statistics
+
+```{r}
+attr(efcu$Q8_r, "labels")
+table(efcu$Q8_r, useNA = "ifany")
+round(prop.table(table(efcu$Q8_r)) * 100, 2)
+
+```
+
+## R2: Descriptive Statistics — Competitors
+
+```{r}
+attr(efcu$q30, "labels")
+table(efcu$q30, useNA = "ifany")
+round(prop.table(table(efcu$q30)) * 100, 2)
+```
+
+## R2: One-Sample t-test — Loan Rates
+
+```{r}
+q8_valid <- as.numeric(efcu$Q8_r)
+q8_valid <- q8_valid[q8_valid %in% 1:5]
+
+q30_valid <- as.numeric(efcu$q30)
+q30_valid <- q30_valid[q30_valid %in% 1:5]
+
+mean(q8_valid)
+sd(q8_valid)
+t.test(q8_valid, mu = 3)
+
+```
+
+## R2: One-Sample t-test — Competitors
+
+```{r}
+mean(q30_valid)
+sd(q30_valid)
+t.test(q30_valid, mu = 3)
+```
+
+## R2: Loan Rate Perceptions
+
+```{r}
+#| label: fig-r2-loan-rates
+#| fig-cap: "Members' Perceptions of Credit Union Loan Rates"
+
+r2_data <- data.frame(
+  Rating = factor(
+    q8_valid,
+    levels = 1:5,
+    labels = c("Very Low", "Low", "Average",
+               "High", "Very High")
+  )
+)
+
+ggplot(r2_data, aes(x = Rating)) +
+  geom_bar(
+    aes(y = after_stat(count / sum(count) * 100)),
+    fill = "steelblue"
+  ) +
+  labs(x = "Loan Rate Rating", y = "Percentage (%)") +
+  theme_minimal()
+```
+
+## R2: Loan Rates Compared to Competitors
+
+```{r}
+#| label: fig-r2-competitors
+#| fig-cap: "Agreement That Credit Union Loan Rates Are Lower"
+
+r2_comp <- data.frame(
+  Rating = factor(
+    q30_valid,
+    levels = 1:5,
+    labels = c("Strongly Disagree", "Disagree",
+               "Uncertain", "Agree", "Strongly Agree")
+  )
+)
+
+ggplot(r2_comp, aes(x = Rating)) +
+  geom_bar(
+    aes(y = after_stat(count / sum(count) * 100)),
+    fill = "steelblue"
+  ) +
+  labs(x = "Agreement Level", y = "Percentage (%)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+```
+
+## R2: Findings and Insights
+
+As shown in @fig-r2-loan-rates, 55.14% of members perceived the credit union's loan rates as average, while 28.04% rated them as high or very high.
+
+As shown in @fig-r2-competitors, 46.09% of members were uncertain whether the credit union offered lower loan rates than its competitors.
+
+Neither loan rate perceptions (M = 3.14, t(106) = 1.91, p = .058) nor agreement about lower loan rates (M = 3.06, t(127) = 0.82, p = .416) differed significantly from the midpoint.
+
+## R2: Recommendations
+
+These findings suggest that the credit union could improve communication about its loan rates and competitive advantages. However, the results do not directly establish why members borrow from other financial institutions.
+
+## R5: Awareness of Credit Union Services
+
+### Descriptive Statistics
+
+```{r}
+r5_vars <- paste0("q", 13:26, "_r")
+
+attr(efcu$q13_r, "labels")
+
+lapply(efcu[r5_vars[1:7]], function(x) {
+  table(x, useNA = "ifany")
+})
+```
+
+## R5: Descriptive Statistics — Q20–Q26
+
+```{r}
+lapply(efcu[r5_vars[8:14]], function(x) {
+  table(x, useNA = "ifany")
+})
+```
+
+## R5: Recoding Verification
+
+```{r}
+attr(efcu$q13, "label")
+attr(efcu$q13, "labels")
+
+table(
+  Original = efcu$q13,
+  Recoded = efcu$q13_r,
+  useNA = "ifany"
+)
+```
+
+## R5: Summary of Service Awareness
+
+```{r}
+#| label: tbl-r5-awareness
+#| tbl-cap: "Response Distribution Across Credit Union Services"
+
+r5_summary <- do.call(rbind, lapply(r5_vars, function(v) {
+  counts <- table(factor(efcu[[v]], levels = 1:3))
+
+  data.frame(
+    Question = v,
+Unaware = as.integer(counts[1]),
+Aware_Not_Used = as.integer(counts[2]),
+Aware_Used = as.integer(counts[3]),
+    Total = sum(counts)
+  )
+}))
+
+kable(r5_summary)
+```
+
+```{r}
+#| include: false
+
+sapply(13:26, function(i) {
+  original <- as.numeric(efcu[[paste0("q", i)]])
+  recoded <- as.numeric(efcu[[paste0("q", i, "_r")]])
+
+  all(recoded == 4 - original, na.rm = TRUE)
+})
+```
+
+## R5: Chi-Square Goodness-of-Fit Test
+
+```{r}
+#| label: tbl-r5-chisquare
+#| tbl-cap: "Chi-Square Test Results for Service Awareness"
+
+r5_tests <- do.call(rbind, lapply(r5_vars, function(v) {
+
+  counts <- table(factor(efcu[[v]], levels = 1:3))
+
+  test <- chisq.test(counts, p = rep(1/3, 3))
+
+  data.frame(
+    Question = v,
+    Chi_Square = round(as.numeric(test$statistic), 2),
+    df = as.numeric(test$parameter),
+    P_Value = format.pval(test$p.value, digits = 3, eps = 0.001),
+    Significant = ifelse(test$p.value < 0.05, "Yes", "No")
+  )
+}))
+
+kable(r5_tests)
+```
+
+## R5: Service Awareness and Usage
+
+```{r}
+#| label: fig-r5-awareness
+#| fig-cap: "Awareness and Usage of Credit Union Services"
+#| fig-width: 10
+#| fig-height: 6
+
+r5_plot <- as.data.frame(
+  as.table(as.matrix(r5_summary[, 2:4]))
+)
+
+names(r5_plot) <- c("Service", "Awareness", "Count")
+
+r5_plot$Service <- factor(
+  rep(paste0("Q", 13:26), 3),
+  levels = rev(paste0("Q", 13:26))
+)
+
+r5_plot$Awareness <- factor(
+  r5_plot$Awareness,
+  levels = c("Unaware", "Aware_Not_Used", "Aware_Used"),
+  labels = c("Unaware", "Aware but Not Used", "Aware and Used")
+)
+
+ggplot(r5_plot, aes(x = Service, y = Count, fill = Awareness)) +
+  geom_col(position = "fill") +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("gray70", "skyblue", "steelblue")) +
+  labs(
+    x = "Credit Union Services",
+    y = "Percentage (%)",
+    fill = "Awareness Level"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+## R5: Findings and Insights
+
+As shown in @fig-r5-awareness, awareness and usage patterns vary across the 14 credit union services.
+
+All 14 chi-square goodness-of-fit tests were statistically significant (p < .001), indicating that the response distributions differed significantly from an equal distribution.
+
+For Q13, 64.84% of respondents were unaware of the service. In contrast, all respondents were aware of the service represented by Q26, although only 37.50% had used it.
+
+## R5: Recommendations
+
+The findings suggest that the credit union should increase awareness of less familiar services and encourage members to use services they already know about.
+
+## R6: Operational Effectiveness
+
+### Descriptive Statistics
+
+```{r}
+r6_vars <- c(
+  "q9_r", "q10_r", "q11", "q12",
+  "q31", "q32", "q33", "q34", "Q37_r"
+)
+
+lapply(efcu[r6_vars[1:4]], function(x) {
+  table(x, useNA = "ifany")
+})
+```
+
+## R6: Descriptive Statistics — Ratings
+
+```{r}
+lapply(efcu[r6_vars[5:9]], function(x) {
+  table(x, useNA = "ifany")
+})
+```
+
+```{r}
+#| include: false
+
+r6_original <- c(
+  "q9", "q10", "q11", "q12",
+  "q31", "q32", "q33", "q34", "q37"
+)
+
+lapply(r6_original, function(v) {
+  list(
+    Question = v,
+    Description = attr(efcu[[v]], "label"),
+    Labels = attr(efcu[[v]], "labels")
+  )
+})
+
+grep("q11|q12|q37", names(efcu),
+     value = TRUE, ignore.case = TRUE)
+```
+
+```{r}
+#| include: false
+
+attr(efcu$q11, "label")
+attr(efcu$q11, "labels")
+table(efcu$q11, useNA = "ifany")
+
+attr(efcu$q12, "label")
+attr(efcu$q12, "labels")
+table(efcu$q12, useNA = "ifany")
+```
+
+## R6: Data Recoding
+
+```{r}
+#| label: tbl-r6-recoding
+#| tbl-cap: "Valid Responses for Q11 and Q12"
+
+efcu$q11_r <- ifelse(
+  efcu$q11 == 1, 2,
+  ifelse(efcu$q11 == 2, 1, NA)
+)
+
+efcu$q12_r <- ifelse(
+  efcu$q12 == 1, 2,
+  ifelse(efcu$q12 == 2, 1, NA)
+)
+
+table(efcu$q11_r, useNA = "ifany")
+table(efcu$q12_r, useNA = "ifany")
+```
+
+## R6: Chi-Square Goodness-of-Fit Test
+
+```{r}
+#| label: tbl-r6-chisquare
+#| tbl-cap: "Chi-Square Tests for Operational Effectiveness"
+
+r6_chi_vars <- c(
+  "q9_r", "q10_r", "q11_r", "q12_r"
+)
+
+r6_levels <- list(1:5, 1:4, 1:2, 1:2)
+
+r6_chi_tests <- do.call(rbind, lapply(
+  seq_along(r6_chi_vars), function(i) {
+
+    v <- r6_chi_vars[i]
+
+    counts <- table(
+      factor(efcu[[v]], levels = r6_levels[[i]])
+    )
+
+    test <- chisq.test(counts)
+
+    data.frame(
+      Question = v,
+      N = sum(counts),
+      Chi_Square = round(as.numeric(test$statistic), 2),
+      df = as.numeric(test$parameter),
+      P_Value = format.pval(test$p.value,
+                            digits = 3, eps = 0.001),
+      Significant = ifelse(test$p.value < 0.05,
+                           "Yes", "No")
+    )
+  }
+))
+
+kable(r6_chi_tests)
+```
+
+## R6: One-Sample t-test
+
+```{r}
+#| label: tbl-r6-ttest
+#| tbl-cap: "One-Sample t-tests for Operational Effectiveness"
+
+r6_t_vars <- c(
+  "q31", "q32", "q33", "q34", "Q37_r"
+)
+
+r6_t_tests <- do.call(rbind, lapply(r6_t_vars, function(v) {
+
+  x <- as.numeric(efcu[[v]])
+  x <- x[x %in% 1:5]
+
+  test <- t.test(x, mu = 3)
+
+  data.frame(
+    Question = v,
+    N = length(x),
+    Mean = round(mean(x), 3),
+    SD = round(sd(x), 3),
+    t = round(as.numeric(test$statistic), 3),
+    df = as.numeric(test$parameter),
+    P_Value = format.pval(test$p.value,
+                          digits = 3, eps = 0.001),
+    Significant = ifelse(test$p.value < 0.05,
+                         "Yes", "No")
+  )
+}))
+
+kable(r6_t_tests)
+```
+
+## R6: Operational Effectiveness Ratings
+
+```{r}
+#| label: fig-r6-ratings
+#| fig-cap: "Mean Ratings of Operational Effectiveness"
+
+ggplot(r6_t_tests, aes(x = Question, y = Mean)) +
+  geom_col(fill = "steelblue", width = 0.7) +
+  geom_hline(
+    yintercept = 3,
+    linetype = "dashed",
+    color = "red"
+  ) +
+  geom_text(
+    aes(label = round(Mean, 2)),
+    vjust = -0.5
+  ) +
+  scale_y_continuous(
+    limits = c(0, 5),
+    breaks = 0:5
+  ) +
+  labs(
+    x = "Survey Question",
+    y = "Mean Rating"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+#| include: false
+
+lapply(c("q31", "q32", "q33", "q34"), function(v) {
+  list(
+    Question = v,
+    Description = attr(efcu[[v]], "label"),
+    Labels = attr(efcu[[v]], "labels")
+  )
+})
+
+table(Original = efcu$q9, Recoded = efcu$q9_r)
+table(Original = efcu$q37, Recoded = efcu$Q37_r)
+```
+
+## R6: Findings and Interpretation
+
+The chi-square goodness-of-fit tests for Q9, Q10, Q11,
+and Q12 showed statistically significant differences
+from equal response distributions (p < 0.001).
+
+Approximately 77.3% of respondents reported that the
+frequency of financial statements was about right.
+Additionally, 97.7% indicated that the statements were
+easy to understand, and 69.8% of valid respondents
+believed that their account information was maintained
+confidentially.
+
+## R6: Findings — Operational Ratings
+
+The one-sample t-tests showed that all five operational
+effectiveness measures had mean ratings significantly
+above the neutral midpoint of 3 (p < 0.001).
+
+The overall management and operational rating received
+the highest mean score (M = 4.066), while the simplicity
+of loan applications received the lowest mean score
+(M = 3.461).
+
+Overall, respondents demonstrated positive perceptions
+of the credit union's operational effectiveness.
+However, simplifying loan applications and strengthening
+confidence in account confidentiality may provide
+opportunities for further improvement.
