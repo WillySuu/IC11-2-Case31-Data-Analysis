@@ -572,3 +572,13 @@ of the credit union's operational effectiveness.
 However, simplifying loan applications and strengthening
 confidence in account confidentiality may provide
 opportunities for further improvement.
+
+## Appendix
+
+### GitHub Repository
+
+[View GitHub Repository](https://github.com/WillySuu/IC11-2-Case31-Data-Analysis)
+
+### Published Presentation
+
+[View Published Presentation](https://willysuu.github.io/IC11-2-Case31-Data-Analysis/)
